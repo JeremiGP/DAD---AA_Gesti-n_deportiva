@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace Actividad_Gestion_Equipos
 {
-    public partial class Form1 : Form
+    public partial class Form2 : Form
     {
         // Declaración de controles de la interfaz
         private ComboBox cmbCategoria;
@@ -24,7 +24,7 @@ namespace Actividad_Gestion_Equipos
         private DataTable dtEquiposMaestro; // Datos originales completos
         private DataTable dtGridEquipos;    // DataTable en memoria para el DataGridView
 
-        public Form1()
+        public Form2()
         {
             InitializeComponent();
 
@@ -90,7 +90,7 @@ namespace Actividad_Gestion_Equipos
             btnAgregar = new Button();
             btnAgregar.Text = "ADD";
             btnAgregar.BackColor = Color.FromArgb(0, 122, 204);
-            btnAgregar.Location = new Point(72,345);
+            btnAgregar.Location = new Point(72, 345);
             btnAgregar.Width = 65;
             btnAgregar.Height = 25;
             btnAgregar.FlatStyle = FlatStyle.Flat;
@@ -138,7 +138,7 @@ namespace Actividad_Gestion_Equipos
             dtGridEquipos.Columns.Add("Categoría", typeof(string));
             dtGridEquipos.Columns.Add("Equipo", typeof(string));
             dtGridEquipos.Columns.Add("Ciudad", typeof(string));
-            
+
             // Enlazar el DataTable del Grid al DataGridView
             dgvEquipos.DataSource = dtGridEquipos;
 
@@ -160,12 +160,49 @@ namespace Actividad_Gestion_Equipos
 
         private void cmbCategoria_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // La Persona 2 programará el filtrado con DataView aquí
+            if (cmbCategoria.SelectedItem == null || !(cmbCategoria.SelectedItem is DataRowView))
+                return;
+
+            DataRowView filaCategoria = (DataRowView)cmbCategoria.SelectedItem;
+            int idCategoria = (int)filaCategoria["Id"];
+
+            DataView vista = new DataView(dtEquiposMaestro);
+            vista.RowFilter = "CategoriaId = " + idCategoria;
+
+            cmbEquipos.DataSource = vista;
+            cmbEquipos.DisplayMember = "Nombre";
+            cmbEquipos.ValueMember = "Id";
         }
 
         private void btnAgregar_Click(object sender, EventArgs e)
         {
-            // La Persona 2 programará la lógica del botón ADD y la validación aquí
+            if (cmbCategoria.SelectedItem == null || cmbEquipos.SelectedItem == null)
+            {
+                MessageBox.Show("Por favor, selecciona un equipo.");
+                return;
+            }
+
+            // Extraer DataRowView de ambos ComboBox (Requisito de la pauta)
+            DataRowView filaCategoria = (DataRowView)cmbCategoria.SelectedItem;
+            DataRowView filaEquipo = (DataRowView)cmbEquipos.SelectedItem;
+
+            int id = (int)filaEquipo["Id"];
+            string nombre = filaEquipo["Nombre"].ToString();
+            string ciudad = filaEquipo["Ciudad"].ToString();
+            string categoria = filaCategoria["Nombre"].ToString();
+
+            // Comprobación de duplicados con casteo simple (int)
+            foreach (DataRow fila in dtGridEquipos.Rows)
+            {
+                if ((int)fila["ID Equipo"] == id)
+                {
+                    MessageBox.Show("Este equipo ya está en la lista.");
+                    return;
+                }
+            }
+
+            // Insertar directamente la fila en el DataTable
+            dtGridEquipos.Rows.Add(id, categoria, nombre, ciudad);
         }
 
         private void Form1_Load(object sender, EventArgs e)
