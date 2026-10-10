@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace Actividad_Gestion_Equipos
 {
-    public partial class Form2 : Form
+    public partial class Form1 : Form
     {
         // Declaración de controles de la interfaz
         private ComboBox cmbCategoria;
@@ -24,7 +24,7 @@ namespace Actividad_Gestion_Equipos
         private DataTable dtEquiposMaestro; // Datos originales completos
         private DataTable dtGridEquipos;    // DataTable en memoria para el DataGridView
 
-        public Form2()
+        public Form1()
         {
             InitializeComponent();
 
