@@ -8,13 +8,32 @@ namespace Actividad_Gestion_Equipos
 {
     public partial class Form1 : Form
     {
-        // Declaración de controles de la interfaz
+        // Barra de Menús Superior
+        private MenuStrip menuStripPrincipal;
+        private ToolStripMenuItem menuArchivo;
+        private ToolStripMenuItem itemLimpiarTabla;
+        private ToolStripMenuItem itemSalir;
+
+        // Sistema de Pestañas
+        private TabControl tabControlPrincipal;
+        private TabPage tabGestion;
+        private TabPage tabEstadisticas;
+
+        // Pestaña 1: Declaración de controles de la interfaz
         private ComboBox cmbCategoria;
         private ComboBox cmbEquipos;
         private Button btnAgregar;
         private DataGridView dgvEquipos;
         private Label lblCategoria;
         private Label lblEquipos;
+
+        // Pestaña 2: Estadísticas y Resumen (Adaptada a tu estilo visual)
+        private Panel panelEstadisticas;
+        private Label lblTituloEstadisticas;
+        private Label lblTotalEquipos;
+        private Label lblTotalFutbol;
+        private Label lblTotalBaloncesto;
+        private Label lblTotalTenis;
 
         // Decorativo: Panel para el encabezado (opcional)
         private Panel panelHeader;
@@ -30,30 +49,73 @@ namespace Actividad_Gestion_Equipos
 
             // Configuración principal de la ventana
             this.Text = "Gestor Deportivo ";
-            this.Size = new Size(680, 450);
+            this.Size = new Size(700, 480);
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.MaximizeBox = false;
 
             // Inicializar y posicionar controles mediante código
             InicializarComponentesPersonalizados();
 
             // Cargar datos maestros y estructurar el DataTable en memoria
             CargarDatosMaestros();
+
+            // Inicializar métricas
+            ActualizarEstadisticas();
         }
 
         private void InicializarComponentesPersonalizados()
         {
+            // ----------------------------------------------------
+            // 1. Barra de Menús Superior (MenuStrip)
+            // ----------------------------------------------------
+            menuStripPrincipal = new MenuStrip();
+            menuStripPrincipal.Dock = DockStyle.Top;
+            menuStripPrincipal.BackColor = Color.WhiteSmoke;
+
+            menuArchivo = new ToolStripMenuItem("&Archivo");
+            itemLimpiarTabla = new ToolStripMenuItem("&Limpiar Tabla");
+            itemSalir = new ToolStripMenuItem("&Salir");
+
+            itemLimpiarTabla.Click += ItemLimpiarTabla_Click;
+            itemSalir.Click += ItemSalir_Click;
+
+            menuArchivo.DropDownItems.Add(itemLimpiarTabla);
+            menuArchivo.DropDownItems.Add(new ToolStripSeparator());
+            menuArchivo.DropDownItems.Add(itemSalir);
+
+            menuStripPrincipal.Items.Add(menuArchivo);
+            this.MainMenuStrip = menuStripPrincipal;
+
+            // ----------------------------------------------------
+            // 2. Control de Pestañas (TabControl)
+            // ----------------------------------------------------
+            tabControlPrincipal = new TabControl();
+            tabControlPrincipal.Dock = DockStyle.Fill;
+
+            tabGestion = new TabPage("Gestión de Equipos");
+            tabEstadisticas = new TabPage("Estadísticas y Resumen");
+
+            tabControlPrincipal.TabPages.Add(tabGestion);
+            tabControlPrincipal.TabPages.Add(tabEstadisticas);
+
+            // Se agregan al formulario garantizando el orden de acoplamiento
+            this.Controls.Add(tabControlPrincipal);
+            this.Controls.Add(menuStripPrincipal);
 
             // Paso 2: Agregar el Panel Lateral Decorativo (Panel)
             panelHeader = new Panel();
             panelHeader.Name = "panelHeader";
-            panelHeader.Width = 200;
             panelHeader.BackColor = Color.FromArgb(0, 122, 204);
             panelHeader.Location = new Point(12, 12);
             panelHeader.Size = new Size(204, 387);
-            this.Controls.Add(panelHeader);
+            tabGestion.Controls.Add(panelHeader);
 
-            // 1. Etiqueta y ComboBox de Categoría (Izquierda)
+            // ====================================================
+            // 3. PESTAÑA 1
+            // ====================================================
+
+            // 1. Etiqueta y ComboBox de Categoría 
             lblCategoria = new Label();
             lblCategoria.Text = "Categoría:";
             lblCategoria.ForeColor = Color.White;
@@ -70,7 +132,7 @@ namespace Actividad_Gestion_Equipos
             cmbCategoria.SelectedIndexChanged += new EventHandler(cmbCategoria_SelectedIndexChanged);
             panelHeader.Controls.Add(cmbCategoria);
 
-            // 2. Etiqueta y ComboBox de Equipos (Centro-Derecha)
+            //Etiqueta y ComboBox de Equipos
             lblEquipos = new Label();
             lblEquipos.Text = "Equipos:";
             lblEquipos.Location = new Point(20, 176);
@@ -89,23 +151,73 @@ namespace Actividad_Gestion_Equipos
             // 3. Botón ADD (Colocado justo después del ComboBox de Equipos)
             btnAgregar = new Button();
             btnAgregar.Text = "ADD";
-            btnAgregar.BackColor = Color.FromArgb(0, 122, 204);
-            btnAgregar.Location = new Point(72, 345);
-            btnAgregar.Width = 65;
-            btnAgregar.Height = 25;
+            btnAgregar.BackColor = Color.White;
+            btnAgregar.ForeColor = Color.FromArgb(0, 122, 204);
+            btnAgregar.Location = new Point(67, 345);
+            btnAgregar.Width = 70;
+            btnAgregar.Height = 28;
             btnAgregar.FlatStyle = FlatStyle.Flat;
             btnAgregar.Click += new EventHandler(btnAgregar_Click);
             panelHeader.Controls.Add(btnAgregar);
 
-            // 4. DataGridView inferior (Alimentado por el DataTable en memoria)
+            // 4. DataGridView inferior 
             dgvEquipos = new DataGridView();
             dgvEquipos.Name = "dgvEquipos";
             dgvEquipos.BackgroundColor = Color.FromArgb(0, 122, 204);
-            dgvEquipos.Location = new Point(233, 12);
-            dgvEquipos.Size = new Size(419, 387);
+            dgvEquipos.Location = new Point(230, 12);
+            dgvEquipos.Size = new Size(435, 387);
             dgvEquipos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvEquipos.ReadOnly = true;
-            this.Controls.Add(dgvEquipos);
+            dgvEquipos.AllowUserToAddRows = false;
+            tabGestion.Controls.Add(dgvEquipos);
+
+            // ====================================================
+            // 4. PESTAÑA 2
+            // ====================================================
+
+            panelEstadisticas = new Panel();
+            panelEstadisticas.Name = "panelEstadisticas";
+            panelEstadisticas.BackColor = Color.FromArgb(0, 122, 204);
+            panelEstadisticas.Location = new Point(12, 12);
+            panelEstadisticas.Size = new Size(653, 387);
+            tabEstadisticas.Controls.Add(panelEstadisticas);
+
+            lblTituloEstadisticas = new Label();
+            lblTituloEstadisticas.Text = "MÉTRICAS Y RESUMEN GENERAL";
+            lblTituloEstadisticas.Font = new Font(this.Font.FontFamily, 12, FontStyle.Bold);
+            lblTituloEstadisticas.ForeColor = Color.White;
+            lblTituloEstadisticas.Location = new Point(30, 30);
+            lblTituloEstadisticas.AutoSize = true;
+            panelEstadisticas.Controls.Add(lblTituloEstadisticas);
+
+            lblTotalEquipos = new Label();
+            lblTotalEquipos.Font = new Font(this.Font.FontFamily, 10, FontStyle.Regular);
+            lblTotalEquipos.ForeColor = Color.White;
+            lblTotalEquipos.Location = new Point(30, 85);
+            lblTotalEquipos.AutoSize = true;
+            panelEstadisticas.Controls.Add(lblTotalEquipos);
+
+            lblTotalFutbol = new Label();
+            lblTotalFutbol.Font = new Font(this.Font.FontFamily, 10, FontStyle.Regular);
+            lblTotalFutbol.ForeColor = Color.White;
+            lblTotalFutbol.Location = new Point(30, 125);
+            lblTotalFutbol.AutoSize = true;
+            panelEstadisticas.Controls.Add(lblTotalFutbol);
+
+            lblTotalBaloncesto = new Label();
+            lblTotalBaloncesto.Font = new Font(this.Font.FontFamily, 10, FontStyle.Regular);
+            lblTotalBaloncesto.ForeColor = Color.White;
+            lblTotalBaloncesto.Location = new Point(30, 165);
+            lblTotalBaloncesto.AutoSize = true;
+            panelEstadisticas.Controls.Add(lblTotalBaloncesto);
+
+            lblTotalTenis = new Label();
+            lblTotalTenis.Font = new Font(this.Font.FontFamily, 10, FontStyle.Regular);
+            lblTotalTenis.ForeColor = Color.White;
+            lblTotalTenis.Location = new Point(30, 205);
+            lblTotalTenis.AutoSize = true;
+            panelEstadisticas.Controls.Add(lblTotalTenis);
+
         }
 
         private void CargarDatosMaestros()
@@ -154,10 +266,6 @@ namespace Actividad_Gestion_Equipos
             }
         }
 
-        // ====================================================================
-        // PARTE DE LA PERSONA 2: TU COMPAÑERO IMPLEMENTARÁ LA LÓGICA AQUÍ
-        // ====================================================================
-
         private void cmbCategoria_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cmbCategoria.SelectedItem == null || !(cmbCategoria.SelectedItem is DataRowView))
@@ -203,11 +311,21 @@ namespace Actividad_Gestion_Equipos
 
             // Insertar directamente la fila en el DataTable
             dtGridEquipos.Rows.Add(id, categoria, nombre, ciudad);
+
+            // Actualizar estadísticas reactivas
+            ActualizarEstadisticas();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void ItemLimpiarTabla_Click(object sender, EventArgs e)
         {
+        }
+        private void ItemSalir_Click(object sender, EventArgs e)
+        {
+        }
 
+        private void ActualizarEstadisticas()
+        {
+ 
         }
     }
 }
