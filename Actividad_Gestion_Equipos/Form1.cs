@@ -318,14 +318,42 @@ namespace Actividad_Gestion_Equipos
 
         private void ItemLimpiarTabla_Click(object sender, EventArgs e)
         {
+            if  (dtGridEquipos != null)
+            {
+                dtGridEquipos.Clear();
+                ActualizarEstadisticas();
+            }
         }
         private void ItemSalir_Click(object sender, EventArgs e)
         {
+            this.Close();
         }
 
         private void ActualizarEstadisticas()
         {
- 
+            if (dtGridEquipos == null) return;
+
+            int totalEquipos = dtGridEquipos.Rows.Count;
+            int totalfutbol = 0;
+            int totalBaloncesto = 0;
+            int totalTenis = 0;
+
+            foreach (DataRow fila in dtGridEquipos.Rows)
+            {
+                string categoria = fila["Categoria"]?.ToString() ?? "";
+
+                if (categoria.Equals("Futbol", StringComparison.OrdinalIgnoreCase))
+                    totalfutbol++;
+                else if (categoria.Equals("Baloncesto", StringComparison.OrdinalIgnoreCase))
+                    totalBaloncesto++;
+                else if (categoria.Equals("Tenis", StringComparison.OrdinalIgnoreCase))
+                    totalTenis++;
+            }
+
+            lblTotalEquipos.Text = $"Total de Equipos: {totalEquipos}";
+            lblTotalFutbol.Text = $"Total de Fútbol: {totalfutbol}";
+            lblTotalBaloncesto.Text = $"Total de Baloncesto: {totalBaloncesto}";
+            lblTotalTenis.Text = $"Total de Tenis: {totalTenis}";
         }
     }
 }
